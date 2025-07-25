@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    Enti‑Taschenrechner
+
+    Diese Datei stellt einen funktionsreichen Taschenrechner mit einer integrierten
+    Währungsumrechnung dar. Der Schwerpunkt liegt auf einer ansprechenden
+    Gestaltung im warmen Orange‑Gelb‑Farbklima, dem Einsatz von Animationen
+    sowie einigen Überraschungen wie dem ENTI‑Easter‑Egg.  Die Designideen
+    orientieren sich an modernen, weichen Oberflächen (Neumorphismus) und
+    lassen sich sowohl auf Desktop‑ als auch auf Mobilgeräten komfortabel
+    bedienen.  Alle Funktionen sind in dieser einen Datei enthalten – es
+    wird kein externes Framework benötigt.
+  -->
+  <title>Enti‑Taschenrechner</title>
+  <style>
+    :root {
+      /* Farbdefinitionen für das orange‑gelbe Farbschema */
+      --primary: #ff9800;
+      --secondary: #ffeb3b;
+      --accent: #ffe082;
+      --text-dark: #1a1a1a;
+      --text-light: #ffffff;
+      --panel-bg: #fefae0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text-dark);
+    }
+    .calculator-wrapper {
+      background: var(--panel-bg);
+      border-radius: 20px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+      overflow: hidden;
+      width: 360px;
+      max-width: 90vw;
+      animation: popIn 0.6s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    /* Kopfbereich mit App‑Titel und Tab‑Navigation */
+    .header {
+      background: var(--primary);
+      padding: 16px;
+      text-align: center;
+      color: var(--text-light);
+      font-weight: bold;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      user-select: none;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background: var(--accent);
+    }
+    .tabs button {
+      flex: 1;
+      padding: 12px 0;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .tabs button.active {
+      background: var(--primary);
+      color: var(--text-light);
+      font-weight: bold;
+    }
+    .tabs button:not(.active):hover {
+      background: rgba(0,0,0,0.05);
+    }
+    /* Panelcontainer für Rechner und Währungsumrechner */
+    .panels {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .panel {
+      /* Panels werden als Blockelemente gestapelt und über display gesteuert. */
+      width: 100%;
+    }
+    .panel:not(.active) {
+      display: none;
+    }
+    /* Rechnerpanel */
+    .calculator-panel {
+      padding: 16px;
+    }
+    .display {
+      background: var(--text-dark);
+      color: var(--text-light);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 2rem;
+      text-align: right;
+      min-height: 56px;
+      overflow-wrap: anywhere;
+      margin-bottom: 12px;
+      transition: background 0.3s;
+    }
+    /* Animation für das ENTI‑Easter‑Egg */
+    @keyframes flash {
+      /* Farbblinken zwischen Orange und Gelb; Text bleibt hell für starken Kontrast */
+      0% { background-color: var(--primary); color: var(--text-light); }
+      50% { background-color: var(--secondary); color: var(--text-light); }
+      100% { background-color: var(--primary); color: var(--text-light); }
+    }
+    .flash {
+      animation: flash 0.6s linear infinite;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .buttons button {
+      padding: 16px 0;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: var(--text-light);
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .buttons button.secondary {
+      background: var(--secondary);
+      color: var(--text-dark);
+    }
+    .buttons button.accent {
+      background: var(--accent);
+      color: var(--text-dark);
+    }
+    .buttons button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+    }
+    /* Währungsumrechnerpanel */
+    .converter-panel {
+      padding: 20px;
+    }
+    .converter-panel label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+    .converter-panel select,
+    .converter-panel input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .converter-panel .convert-result {
+      margin-top: 16px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+      min-height: 28px;
+      /* Anfangs unsichtbar für Animation */
+      opacity: 1;
+    }
+
+    @keyframes resultPop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .convert-result.show {
+      animation: resultPop 0.4s ease;
+    }
+    .converter-panel button {
+      margin-top: 16px;
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: var(--text-light);
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    }
+    .converter-panel button:hover {
+      background: var(--secondary);
+      color: var(--text-dark);
+    }
+    @media (max-width: 480px) {
+      .calculator-wrapper {
+        width: 95vw;
+      }
+      .display {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-wrapper">
+    <div class="header">enti‑Taschenrechner</div>
+    <div class="tabs">
+      <button id="calcTab" class="active">Rechner</button>
+      <button id="convTab">Währungsumrechner</button>
+    </div>
+    <div class="panels">
+      <!-- Rechnerpanel -->
+      <div id="calculatorPanel" class="panel active calculator-panel">
+        <div id="display" class="display">0</div>
+        <div class="buttons">
+          <!-- Erste Zeile: Speicherfunktionen -->
+          <button class="secondary" data-action="mc">MC</button>
+          <button class="secondary" data-action="mr">MR</button>
+          <button class="secondary" data-action="mplus">M+</button>
+          <button class="secondary" data-action="mminus">M-</button>
+          <!-- Zweite Zeile: Zusätzliche Funktionen -->
+          <button class="accent" data-action="clear">C</button>
+          <button class="accent" data-action="delete">DEL</button>
+          <button class="accent" data-action="square">x²</button>
+          <button class="accent" data-action="sqrt">√</button>
+          <!-- Dritte Zeile: weitere Funktionen -->
+          <button class="accent" data-action="reciprocal">1/x</button>
+          <button class="accent" data-action="percent">%</button>
+          <button class="accent" data-action="factorial">n!</button>
+          <button class="accent" data-action="divide">÷</button>
+          <!-- Vierte Zeile: numerische Tasten -->
+          <button data-action="7">7</button>
+          <button data-action="8">8</button>
+          <button data-action="9">9</button>
+          <button class="accent" data-action="multiply">×</button>
+          <!-- Fünfte Zeile -->
+          <button data-action="4">4</button>
+          <button data-action="5">5</button>
+          <button data-action="6">6</button>
+          <button class="accent" data-action="minus">−</button>
+          <!-- Sechste Zeile -->
+          <button data-action="1">1</button>
+          <button data-action="2">2</button>
+          <button data-action="3">3</button>
+          <button class="accent" data-action="plus">+</button>
+          <!-- Siebte Zeile -->
+          <button data-action="plusminus">±</button>
+          <button data-action="0">0</button>
+          <button data-action="dot">,</button>
+          <button id="equalsBtn" class="secondary" data-action="equals">E</button>
+        </div>
+      </div>
+      <!-- Währungsumrechnerpanel -->
+      <div id="converterPanel" class="panel converter-panel">
+        <label for="amountInput">Betrag</label>
+        <input type="number" id="amountInput" placeholder="0" step="any" min="0">
+        <label for="fromCurrency">Von Währung</label>
+        <select id="fromCurrency">
+          <option value="EUR">EUR – Euro</option>
+          <option value="USD">USD – US‑Dollar</option>
+          <option value="GBP">GBP – Britisches Pfund</option>
+          <option value="CHF">CHF – Schweizer Franken</option>
+          <option value="CAD">CAD – Kanadischer Dollar</option>
+          <option value="INR">INR – Indische Rupie</option>
+          <option value="AUD">AUD – Australischer Dollar</option>
+          <option value="JPY">JPY – Japanischer Yen</option>
+          <option value="PLN">PLN – Polnischer Złoty</option>
+        </select>
+        <label for="toCurrency">Zu Währung</label>
+        <select id="toCurrency">
+          <option value="USD">USD – US‑Dollar</option>
+          <option value="EUR">EUR – Euro</option>
+          <option value="GBP">GBP – Britisches Pfund</option>
+          <option value="CHF">CHF – Schweizer Franken</option>
+          <option value="CAD">CAD – Kanadischer Dollar</option>
+          <option value="INR">INR – Indische Rupie</option>
+          <option value="AUD">AUD – Australischer Dollar</option>
+          <option value="JPY">JPY – Japanischer Yen</option>
+          <option value="PLN">PLN – Polnischer Złoty</option>
+        </select>
+        <button id="convertBtn">Umrechnen</button>
+        <div id="convertResult" class="convert-result"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      // --- Tabbed Panels für Rechner und Währungsumrechner ---
+      const calcTab = document.getElementById('calcTab');
+      const convTab = document.getElementById('convTab');
+      const calculatorPanel = document.getElementById('calculatorPanel');
+      const converterPanel = document.getElementById('converterPanel');
+
+      function showPanel(panel) {
+        // Alle Panels ausblenden
+        calculatorPanel.classList.remove('active');
+        converterPanel.classList.remove('active');
+        calculatorPanel.style.display = 'none';
+        converterPanel.style.display = 'none';
+        // Tabs zurücksetzen
+        calcTab.classList.remove('active');
+        convTab.classList.remove('active');
+        // Panel anzeigen und Tab aktiv setzen
+        if (panel === 'calc') {
+          calculatorPanel.style.display = 'block';
+          calculatorPanel.classList.add('active');
+          calcTab.classList.add('active');
+        } else {
+          converterPanel.style.display = 'block';
+          converterPanel.classList.add('active');
+          convTab.classList.add('active');
+        }
+      }
+      calcTab.addEventListener('click', () => showPanel('calc'));
+      convTab.addEventListener('click', () => showPanel('conv'));
+
+      // --- Calculator Logic ---
+      const display = document.getElementById('display');
+      const buttons = document.querySelectorAll('.buttons button');
+      let memory = 0;
+      let currentInput = '';
+      let resultDisplayed = false;
+      // Array zum Speichern der Zeitstempel der Gleich‑Taste (E) für ENTI‑Easter‑Egg
+      let equalPressTimes = [];
+      const fonts = ['Courier New', 'Comic Sans MS', 'Georgia', 'Impact'];
+
+      function updateDisplay(value) {
+        display.textContent = value;
+      }
+
+      function clearAll() {
+        currentInput = '';
+        updateDisplay('0');
+      }
+
+      function deleteLast() {
+        if (resultDisplayed) {
+          // nach Anzeige eines Ergebnisses beginnt neue Eingabe
+          currentInput = '';
+          resultDisplayed = false;
+          updateDisplay('0');
+          return;
+        }
+        currentInput = currentInput.slice(0, -1);
+        updateDisplay(currentInput || '0');
+      }
+
+      function appendValue(val) {
+        // Wenn Ergebnis angezeigt und eine Zahl gedrückt wird, neuen Ausdruck beginnen
+        if (resultDisplayed && !isNaN(parseInt(val))) {
+          currentInput = '';
+          resultDisplayed = false;
+        }
+        // Ersetzen von Dezimalzeichen
+        if (val === ',') val = '.';
+        currentInput += val;
+        updateDisplay(currentInput);
+      }
+
+      function toggleSign() {
+        if (!currentInput) return;
+        if (currentInput.startsWith('-')) {
+          currentInput = currentInput.substring(1);
+        } else {
+          currentInput = '-' + currentInput;
+        }
+        updateDisplay(currentInput);
+      }
+
+      function square() {
+        if (!currentInput) return;
+        try {
+          const value = evaluateExpression(currentInput);
+          const res = value * value;
+          currentInput = res.toString();
+          updateDisplay(currentInput);
+          resultDisplayed = true;
+        } catch (e) {
+          updateDisplay('Fehler');
+        }
+      }
+
+      function sqrt() {
+        if (!currentInput) return;
+        try {
+          const value = evaluateExpression(currentInput);
+          if (value < 0) throw new Error('neg');
+          const res = Math.sqrt(value);
+          currentInput = res.toString();
+          updateDisplay(currentInput);
+          resultDisplayed = true;
+        } catch (e) {
+          updateDisplay('Fehler');
+        }
+      }
+
+      function reciprocal() {
+        if (!currentInput) return;
+        try {
+          const value = evaluateExpression(currentInput);
+          if (value === 0) throw new Error('0');
+          const res = 1 / value;
+          currentInput = res.toString();
+          updateDisplay(currentInput);
+          resultDisplayed = true;
+        } catch (e) {
+          updateDisplay('Fehler');
+        }
+      }
+
+      function factorial() {
+        if (!currentInput) return;
+        try {
+          const value = evaluateExpression(currentInput);
+          if (value < 0 || !Number.isInteger(value) || value > 170) {
+            throw new Error('range');
+          }
+          let res = 1;
+          for (let i = 1; i <= value; i++) res *= i;
+          currentInput = res.toString();
+          updateDisplay(currentInput);
+          resultDisplayed = true;
+        } catch (e) {
+          updateDisplay('Fehler');
+        }
+      }
+
+      function percent() {
+        // Prozent berechnet den aktuellen Wert durch 100
+        if (!currentInput) return;
+        try {
+          const value = evaluateExpression(currentInput);
+          const res = value / 100;
+          currentInput = res.toString();
+          updateDisplay(currentInput);
+          resultDisplayed = true;
+        } catch (e) {
+          updateDisplay('Fehler');
+        }
+      }
+
+      function memoryRecall() {
+        currentInput = memory.toString();
+        updateDisplay(currentInput);
+      }
+      function memoryClear() {
+        memory = 0;
+      }
+      function memoryAdd() {
+        try {
+          const val = evaluateExpression(currentInput || '0');
+          memory += val;
+        } catch (e) {}
+      }
+      function memorySub() {
+        try {
+          const val = evaluateExpression(currentInput || '0');
+          memory -= val;
+        } catch (e) {}
+      }
+
+      function evaluateExpression(expr) {
+        // Ersetze benutzerfreundliche Zeichen durch JavaScript‑Ausdrücke
+        let sanitized = expr.replace(/×/g, '*').replace(/÷/g, '/');
+        // Allow comma as decimal point already replaced in appendValue
+        // Evaluate using Function constructor for isolation
+        return new Function('return ' + sanitized)();
+      }
+
+      function calculateResult() {
+        // Easter‑Egg: viermaliges Drücken des E‑Knopfs innerhalb von 2 Sekunden
+        const now = Date.now();
+        if (equalPressTimes.length === 0) {
+          equalPressTimes.push(now);
+        } else {
+          equalPressTimes.push(now);
+          if (now - equalPressTimes[0] <= 2000) {
+            if (equalPressTimes.length >= 4) {
+              triggerEnti();
+              equalPressTimes = [];
+              return;
+            }
+          } else {
+            equalPressTimes = [now]; // starte neu
+          }
+        }
+
+
+        }
+        try {
+          let value = evaluateExpression(currentInput || '0');
+          // Wenn value 2+2 war? optional Easter‑Egg: 2+2=1 – hier bewusst NICHT implementiert
+          currentInput = value.toString();
+          updateDisplay(currentInput);
+          resultDisplayed = true;
+        } catch (e) {
+          updateDisplay('Fehler');
+        }
+      }
+
+      function triggerEnti() {
+        // Speichere aktuellen Ausdruck, um später zurückzukehren
+        const previous = currentInput;
+        // Wähle zufällige Schriftart und aktiviere Farbblinken
+        const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
+        // Während des Easter‑Eggs: schwarzer Hintergrund und weiße Schrift
+        display.style.backgroundColor = '#000';
+        display.style.color = '#fff';
+        display.style.fontFamily = randomFont;
+        display.classList.add('flash');
+        display.textContent = 'ENTI';
+        // Nach kurzer Zeit wiederherstellen
+        setTimeout(() => {
+          display.classList.remove('flash');
+          // Ursprüngliche Stile zurücksetzen
+          display.style.backgroundColor = '';
+          display.style.color = '';
+          display.style.fontFamily = '';
+          updateDisplay(previous || '0');
+        }, 1200);
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.getAttribute('data-action');
+          switch(action) {
+            case 'mc': memoryClear(); break;
+            case 'mr': memoryRecall(); break;
+            case 'mplus': memoryAdd(); break;
+            case 'mminus': memorySub(); break;
+            case 'clear': clearAll(); break;
+            case 'delete': deleteLast(); break;
+            case 'square': square(); break;
+            case 'sqrt': sqrt(); break;
+            case 'reciprocal': reciprocal(); break;
+            case 'factorial': factorial(); break;
+            case 'percent': percent(); break;
+            case 'divide': appendValue('/'); break;
+            case 'multiply': appendValue('*'); break;
+            case 'minus': appendValue('-'); break;
+            case 'plus': appendValue('+'); break;
+            case 'plusminus': toggleSign(); break;
+            case 'dot': appendValue('.'); break;
+            case 'equals': calculateResult(); break;
+            default:
+              // Zahl
+              appendValue(action);
+          }
+        });
+      });
+
+      // --- Währungsumrechner Logik ---
+      const amountInput = document.getElementById('amountInput');
+      const fromCurrency = document.getElementById('fromCurrency');
+      const toCurrency = document.getElementById('toCurrency');
+      const convertResult = document.getElementById('convertResult');
+      const convertBtn = document.getElementById('convertBtn');
+
+      // Umrechnungskurse (USD pro Einheit) – basierend auf öffentlich verfügbaren Daten vom 25. Juli 2025【141303823908011†L48-L50】【141303823908011†L124-L133】
+      const usdPerCurrency = {
+        'EUR': 1.17420,   // 1 EUR = 1.17420 USD【141303823908011†L48-L50】
+        'USD': 1,
+        'GBP': 1.34375,   // 1 GBP = 1.34375 USD【141303823908011†L124-L133】
+        'CHF': 1.25794,   // 1 CHF = 1.25794 USD【141303823908011†L124-L133】
+        'CAD': 0.729847,  // 1 CAD = 0.729847 USD【141303823908011†L124-L133】
+        'INR': 0.01156,   // 1 INR ≈ 0.01156 USD (berechnet aus 1 USD = 86.5025 INR)【141303823908011†L124-L133】
+        'AUD': 0.6570,    // 1 AUD ≈ 0.657 USD (berechnet aus 1 USD = 1.523 AUD)【141303823908011†L124-L133】
+        'JPY': 0.006773,  // 1 JPY ≈ 0.006773 USD (berechnet aus 1 USD = 147.67 JPY)【141303823908011†L124-L133】
+        'PLN': 0.2764    // 1 PLN ≈ 0.2764 USD (berechnet aus 1 USD = 3.61655 PLN)【141303823908011†L124-L133】
+      };
+
+      function convertCurrency(amount, from, to) {
+        const fromRate = usdPerCurrency[from];
+        const toRate = usdPerCurrency[to];
+        return amount * fromRate / toRate;
+      }
+
+      convertBtn.addEventListener('click', () => {
+        const amount = parseFloat(amountInput.value);
+        if (isNaN(amount) || amount < 0) {
+          convertResult.textContent = 'Bitte Zahl eingeben';
+          return;
+        }
+        const from = fromCurrency.value;
+        const to = toCurrency.value;
+        if (from === to) {
+          convertResult.textContent = amount.toFixed(2) + ' ' + to;
+          // Animation anzeigen
+          convertResult.classList.remove('show');
+          void convertResult.offsetWidth; // Trigger reflow for restart animation
+          convertResult.classList.add('show');
+          return;
+        }
+        const result = convertCurrency(amount, from, to);
+        convertResult.textContent = result.toFixed(4) + ' ' + to;
+        // kurzzeitig Animationsklasse hinzufügen
+        convertResult.classList.remove('show');
+        void convertResult.offsetWidth;
+        convertResult.classList.add('show');
+      });
+    })();
+  </script>
+</body>
+</html>
