@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>SWE | Shadow Empire - Cyberpunk Edition</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Poppins:wght@300;400;600;700&family=Press+Start+2P&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Poppins:wght@300;400;600;700&family=Press+Start+2P&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Poppins:wght@300;400;600;700&family=Press+Start+2P&display=swap" />
+    </noscript>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/kTcXn0P+2a9FQYFJbS9x+h0cYfZfbQ3VIAtF5NCz7L+G2kZZgwyXR0YJIUKGwEuZfS3CW1xY2KX5A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        :root {
+            --color-dark: #070707;
+            --color-text-light: #f0f0f0;
+            --color-fire: #ff4500;
+            --color-fire-glow: rgba(255, 69, 0, 0.9);
+            --color-opsucht-blue: #00bfff;
+            --color-glass-bg: rgba(15, 15, 15, 0.72);
+            --color-glass-bg-scrolled: rgba(5, 5, 5, 0.94);
+            --color-glass-border: rgba(255, 255, 255, 0.1);
+            --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-speed: 0.6s;
+            --header-height-initial: 90px;
+            --header-height-scrolled: 70px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--color-dark);
+            color: var(--color-text-light);
+            font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            cursor: default;
+            min-height: 100vh;
+        }
+
+        body.menu-open {
+            overflow: hidden;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .logo {
+            font-family: 'Orbitron', 'Poppins', sans-serif;
+            font-size: clamp(2rem, 2.5vw + 1rem, 2.5rem);
+            font-weight: 700;
+            color: var(--color-fire);
+            text-shadow: 0 0 10px var(--color-fire-glow), 0 0 20px rgba(255, 69, 0, 0.5);
+            letter-spacing: 2px;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+
+        .logo:hover {
+            color: #fff;
+            text-shadow: 0 0 15px #fff, 0 0 25px var(--color-fire-glow);
+        }
+
+        #hero-title-wrapper {
+            position: relative;
+            display: inline-block;
+            --title-offset-x: 0px;
+            --title-offset-y: 0px;
+        }
+
+        #hero-title-wrapper::before {
+            content: attr(data-title);
+            position: absolute;
+            inset: 0;
+            color: var(--color-fire);
+            opacity: 0.12;
+            transition: transform 0.12s linear;
+            z-index: -1;
+            pointer-events: none;
+            transform: translate(var(--title-offset-x), var(--title-offset-y));
+        }
+
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: var(--color-fire);
+            z-index: 9999;
+            box-shadow: 0 0 12px var(--color-fire-glow);
+            transition: width 0.2s linear;
+        }
+
+        .glass-effect {
+            background: var(--color-glass-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--color-glass-border);
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.48);
+            transition: opacity var(--transition-speed) var(--transition-curve), transform var(--transition-speed) var(--transition-curve);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .glass-effect.visible-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .content-section h2,
+        .about-item i,
+        .stat-item i,
+        .highlight-contact,
+        .hero-title-animated {
+            color: var(--color-fire);
+            text-shadow: 0 0 12px var(--color-fire-glow);
+            transition: color 0.4s var(--transition-curve), text-shadow 0.4s var(--transition-curve);
+        }
+
+        #hero-title {
+            font-size: clamp(2.4rem, 2.5vw + 1.5rem, 3.6rem);
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 0;
+            animation: pulseGlow 5s infinite ease-in-out;
+            color: var(--color-text-light);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-text {
+            display: block;
+            margin-top: 5px;
+            font-weight: 700;
+            font-size: 1.55em;
+            color: #fff;
+            text-shadow: 0 0 5px var(--color-fire-glow);
+            margin-bottom: 5px;
+        }
+
+        .stat-description {
+            font-size: 0.95em;
+            opacity: 0.75;
+            min-height: 40px;
+            display: block;
+        }
+
+        @keyframes pulseGlow {
+            0%,
+            100% {
+                text-shadow: 0 0 15px var(--color-fire-glow), 0 0 30px rgba(255, 69, 0, 0.4);
+            }
+            50% {
+                text-shadow: 0 0 25px var(--color-fire-glow), 0 0 50px rgba(255, 69, 0, 0.6);
+            }
+        }
+
+        .btn-glass {
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 10px;
+            background: rgba(255, 69, 0, 0.85);
+            color: #fff !important;
+            font-weight: 600;
+            border: 1px solid rgba(255, 69, 0, 0.32);
+            box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4);
+            transition: transform 0.3s var(--transition-curve), box-shadow 0.3s var(--transition-curve), background 0.3s var(--transition-curve);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: buttonPulse 4s infinite ease-in-out;
+        }
+
+        @keyframes buttonPulse {
+            0%,
+            100% {
+                box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 30px rgba(255, 69, 0, 0.8);
+            }
+        }
+
+        .btn-glass:hover {
+            background: var(--color-fire);
+            box-shadow: 0 8px 25px rgba(255, 69, 0, 0.9);
+            transform: translateY(-3px) scale(1.02);
+            animation: none;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-animation 0.7s linear;
+            background-color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        #particle-canvas,
+        .background-animation {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .background-animation {
+            background: linear-gradient(135deg, rgb(10 10 10) 0%, rgb(30 0 0) 100%);
+            z-index: -3;
+        }
+
+        .background-animation::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255, 69, 0, 0.05) 1px, rgba(255, 69, 0, 0.05) 2px);
+            opacity: 0.1;
+            animation: glitch-shift 60s linear infinite;
+        }
+
+        @keyframes glitch-shift {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 1000px 1000px;
+            }
+        }
+
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: var(--color-dark);
+            z-index: 9998;
+            display: grid;
+            place-items: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.8s var(--transition-curve), visibility 0.8s;
+            gap: 20px;
+        }
+
+        .loader {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            color: var(--color-fire);
+            text-shadow: 0 0 10px var(--color-fire-glow);
+            position: relative;
+            animation: preloaderPulse 1.5s infinite ease-in-out;
+        }
+
+        .loader::before {
+            content: 'LADE IMPERIUM...';
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.55em;
+            color: #ccc;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        @keyframes preloaderPulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.05);
+            }
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            height: var(--header-height-initial);
+            transition: background 0.4s var(--transition-curve), padding 0.4s var(--transition-curve), height 0.4s var(--transition-curve), box-shadow 0.4s var(--transition-curve);
+            background: transparent;
+        }
+
+        header.scrolled-header {
+            padding: 10px 40px;
+            background: var(--color-glass-bg-scrolled);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--color-glass-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            height: var(--header-height-scrolled);
+        }
+
+        main {
+            padding-top: var(--header-height-initial);
+            transition: padding-top 0.4s var(--transition-curve);
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            padding: clamp(24px, 4vw, 40px);
+            border-radius: 20px;
+            transform-style: preserve-3d;
+            transition: transform 0.12s linear;
+            will-change: transform;
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: clamp(32px, 5vw, 50px) clamp(20px, 5vw, 30px);
+        }
+
+        .about-grid,
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        #scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--color-fire);
+            opacity: 0.7;
+            font-size: 2em;
+            animation: bounce 1.5s infinite;
+            cursor: pointer;
+            z-index: 50;
+        }
+
+        @keyframes bounce {
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translate(-50%, 0);
+            }
+            40% {
+                transform: translate(-50%, -15px);
+            }
+            60% {
+                transform: translate(-50%, -7px);
+            }
+        }
+
+        .about-item,
+        .stat-item {
+            padding: 30px;
+            border-radius: 15px;
+            background: rgba(255, 69, 0, 0.06);
+            border: 1px solid rgba(255, 69, 0, 0.12);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+        }
+
+        .about-item:hover,
+        .stat-item:hover {
+            background: rgba(255, 69, 0, 0.18);
+            box-shadow: 0 15px 30px rgba(255, 69, 0, 0.2);
+            transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) scale(1.02);
+        }
+
+        .about-item i,
+        .stat-item i {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            transition: transform 0.4s ease;
+            display: inline-block;
+        }
+
+        .about-item:hover i {
+            transform: translateZ(20px) rotate(5deg);
+        }
+
+        #game-modal {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.94);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.45s var(--transition-curve), visibility 0.45s;
+            padding: 20px;
+        }
+
+        .game-content {
+            background: var(--color-dark);
+            border-radius: 20px;
+            box-shadow: 0 0 45px rgba(255, 69, 0, 0.75);
+            padding: 20px;
+            max-width: 95%;
+            width: min(700px, 100%);
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.45s var(--transition-curve);
+        }
+
+        #game-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #game-modal.open .game-content {
+            transform: scale(1);
+        }
+
+        #game-canvas {
+            position: relative;
+            width: 100%;
+            height: clamp(260px, 55vh, 450px);
+            background: #0f172a;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        #game-canvas canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .game-controls {
+            text-align: center;
+        }
+
+        #copy-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-fire);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 10000;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin: 50px auto 0;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            max-width: 1200px;
+        }
+
+        @media (max-width: 1024px) {
+            #main-nav {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100%;
+                width: min(70%, 320px);
+                background: var(--color-glass-bg-scrolled);
+                backdrop-filter: blur(22px);
+                border-left: 1px solid var(--color-glass-border);
+                display: flex;
+                flex-direction: column;
+                padding: 100px 30px 20px;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+                transform: translateX(100%);
+                transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+                gap: 16px;
+            }
+
+            #main-nav .nav-link,
+            #main-nav .btn-glass {
+                font-size: 1.35em;
+                margin: 0;
+                padding: 12px 0;
+                text-align: left;
+                width: 100%;
+                display: block;
+            }
+
+            header {
+                padding: 15px 20px;
+            }
+
+            header.scrolled-header {
+                padding: 10px 20px;
+            }
+
+            body.menu-open #main-nav {
+                transform: translateX(0);
+            }
+
+            #menu-toggle {
+                display: block !important;
+            }
+
+            #logo-text {
+                z-index: 1001;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #hero-title {
+                font-size: clamp(2rem, 8vw, 2.5rem);
+            }
+
+            .content-section {
+                padding: 28px 18px;
+            }
+
+            #game-canvas {
+                height: clamp(240px, 60vh, 320px);
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+
+            .hero-content,
+            .about-item,
+            .stat-item {
+                transform: none !important;
+            }
+
+            .background-animation::before {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader" role="status" aria-live="polite">
+        <div class="loader logo">SWE</div>
+    </div>
+
+    <div id="scroll-progress" aria-hidden="true"></div>
+
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+    <div class="background-animation" aria-hidden="true"></div>
+
+    <header id="main-header">
+        <a href="#home" class="logo" id="logo-text">SWE</a>
+
+        <button id="menu-toggle" aria-label="Menü öffnen oder schließen" style="display: none; background: none; border: none; color: var(--color-fire); font-size: 1.6em; cursor: pointer; z-index: 1001;">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+
+        <nav id="main-nav" aria-label="Hauptnavigation">
+            <a href="#home" class="nav-link">Home</a>
+            <a href="#about" class="nav-link">Über uns</a>
+            <a href="#success" class="nav-link">Triumphe</a>
+            <a href="#join" class="btn-glass">Beitreten</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero-section">
+            <div id="hero-content" class="hero-content">
+                <div id="hero-title-wrapper" data-title="DAS SHADOW EMPIRE HERRSCHT">
+                    <h1 id="hero-title">DAS SHADOW EMPIRE HERRSCHT</h1>
+                </div>
+                <p>
+                    Wir sind ein aktiver Clan auf dem
+                    <span style="color: var(--color-opsucht-blue); font-weight: 600; text-shadow: 0 0 5px rgba(0, 191, 255, 0.6);">OPSucht</span>
+                    CityBuild-Server, bekannt für unsere Präsenz und unseren Clan Plot.
+                </p>
+                <a href="#join" class="btn-glass">Dein Platz im Imperium</a>
+            </div>
+
+            <a id="scroll-hint" href="#about" aria-label="Weiter zur Über-uns-Sektion">
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </a>
+        </section>
+
+        <section id="about" class="content-section glass-effect">
+            <h2>WER WIR SIND</h2>
+            <p style="text-align: center; margin-bottom: 40px; opacity: 0.8;">
+                Unsere Mission ist es, auf allen Ebenen von OPSucht zu dominieren – durch Stärke, Loyalität und Aktivität.
+            </p>
+            <div class="about-grid">
+                <div class="about-item">
+                    <i class="fas fa-hammer" aria-hidden="true"></i>
+                    <h3>Clan Plot</h3>
+                    <p>Unser Clan Plot (Clan Bauplatz) wird zur größten Festung auf <span style="color: var(--color-opsucht-blue); font-weight: 600;">OPSucht</span> ausgebaut.</p>
+                </div>
+                <div class="about-item">
+                    <i class="fas fa-handshake" aria-hidden="true"></i>
+                    <h3>Einheit</h3>
+                    <p>Zusammenhalt ist unsere Stärke. Jedes Shadow-Mitglied zählt und unterstützt das Team bedingungslos.</p>
+                </div>
+                <div class="about-item">
+                    <i class="fas fa-fire" aria-hidden="true"></i>
+                    <h3>Aktivität</h3>
+                    <p>Wir legen Wert auf eine aktive und leidenschaftliche Teilnahme unserer Mitglieder, sowohl ingame als auch in der Community.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="success" class="content-section glass-effect">
+            <h2>UNSERE TRIUMPHE &amp; COMMUNITY</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                    <h3>Aktive Mitglieder</h3>
+                    <p class="stat-text">Mehrere Dutzend</p>
+                    <span class="stat-description">Wir verfügen über einen stabilen Kern aktiver Spieler, die das Imperium täglich stärken.</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-crown" aria-hidden="true"></i>
+                    <h3>Clan-Level</h3>
+                    <p class="stat-text">Fortgeschritten</p>
+                    <span class="stat-description">Durch harte Arbeit und Hingabe haben wir einen hohen Rang erreicht, der stetig wächst.</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fab fa-discord" aria-hidden="true"></i>
+                    <h3>Discord Server</h3>
+                    <p class="stat-text">Gut besucht</p>
+                    <span class="stat-description">Unsere Discord-Community ist der zentrale Treffpunkt für Organisation und Freundschaft.</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="join" class="content-section glass-effect join-section">
+            <h2>WERDE EIN SCHATTEN</h2>
+            <p>Wenn du ein Teil des Shadow Empire werden möchtest, kontaktiere uns und starte deine Reise!</p>
+
+            <p class="join-instructions" style="font-size: 1.1em; font-weight: 700; color: var(--color-fire);">Schreibe <strong>picto_19</strong> auf Discord für eine Bewerbung.</p>
+
+            <button id="copy-discord" class="btn-glass" type="button" aria-label="Discord ID kopieren">
+                <i class="fab fa-discord" aria-hidden="true"></i>
+                Klicke, um <strong>picto_19</strong> zu kopieren!
+            </button>
+        </section>
+    </main>
+
+    <div class="game-container-wrapper glass-effect" style="text-align: center; max-width: 1200px; margin: 50px auto; padding: 30px;">
+        <button id="open-game-btn" class="btn-glass" type="button">
+            <i class="fas fa-gamepad" aria-hidden="true"></i>
+            Flappy Shadow Spielen
+        </button>
+    </div>
+
+    <div id="copy-message" role="status" aria-live="assertive">Discord ID kopiert!</div>
+
+    <div id="game-modal" role="dialog" aria-modal="true" aria-labelledby="game-info">
+        <div class="game-content">
+            <button id="close-game-btn" type="button" aria-label="Spiel schließen" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; z-index: 1001;">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+
+            <div id="game-canvas">
+                <div id="game-score" style="position: absolute; top: 10px; width: 100%; text-align: center; color: #ffeb3b; font-family: 'Press Start 2P', cursive; font-size: 1rem; z-index: 10; pointer-events: none;">PUNKTE: 0</div>
+                <div id="game-highscore" style="position: absolute; top: 35px; width: 100%; text-align: center; color: #fff; opacity: 0.8; font-family: 'Press Start 2P', cursive; font-size: 0.7rem; z-index: 10; pointer-events: none;">BESTER: 0</div>
+            </div>
+
+            <div class="game-controls">
+                <p id="game-info" style="font-family: 'Press Start 2P', cursive; font-size: 0.8rem; margin-bottom: 10px; min-height: 1em;">Klicke, um zu starten!</p>
+                <button id="game-action-button" class="btn-glass" type="button">SPIEL STARTEN</button>
+                <button id="game-exit-button" class="btn-glass" type="button" style="background: rgba(45, 45, 45, 0.8); margin-left: 10px;">
+                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                    ZUM IMPERIUM
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="glass-effect">
+        <p>&copy; 2025 Shadow Empire. Eine aktive Gemeinschaft auf <span style="color: var(--color-opsucht-blue); font-weight: 600;">OPSucht</span>.</p>
+        <div class="developer-info" style="font-size: 0.85em; opacity: 0.75;">
+            <p>Owner: <span>Picto_19</span> | Developer dieser Website: <span>.EntiCraft144973</span></p>
+        </div>
+    </footer>
+
+    <script type="module">
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobile = () => window.innerWidth <= 1024;
+
+        const mainHeader = document.getElementById('main-header');
+        const heroContent = document.getElementById('hero-content');
+        const heroSection = document.getElementById('home');
+        const heroTitleWrapper = document.getElementById('hero-title-wrapper');
+        const scrollProgress = document.getElementById('scroll-progress');
+        const btnGlassElements = document.querySelectorAll('.btn-glass');
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainNav = document.getElementById('main-nav');
+        const navLinks = document.querySelectorAll('#main-nav a');
+        const preloader = document.getElementById('preloader');
+        const scrollHint = document.getElementById('scroll-hint');
+        const copyButton = document.getElementById('copy-discord');
+        const copyMessage = document.getElementById('copy-message');
+        const particleCanvas = document.getElementById('particle-canvas');
+        const pCtx = particleCanvas.getContext('2d', { alpha: true });
+
+        let particles = [];
+        let animationFrameIdParticles;
+        let hasInitializedParticles = false;
+        let animationPaused = false;
+        let currentScrollY = 0;
+        let rafScheduled = false;
+        let pointerActive = false;
+        let toneLoaded = false;
+        let synth;
+        let crash;
+        let toneLoader;
+
+        const particleSettings = {
+            count: prefersReducedMotion ? 0 : 32,
+            maxSize: 2.6,
+            verticalSpeed: prefersReducedMotion ? 0 : 0.8,
+            horizontalSpeed: prefersReducedMotion ? 0 : 0.2
+        };
+
+        function triggerHapticFeedback() {
+            if ('vibrate' in navigator && isMobile()) {
+                navigator.vibrate(35);
+            }
+        }
+
+        function setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible-content');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: isMobile() ? 0.05 : 0.3 });
+
+            document.querySelectorAll('.content-section, .game-container-wrapper, footer').forEach((element) => {
+                observer.observe(element);
+            });
+        }
+
+        function updateScrollAndHeader() {
+            currentScrollY = window.scrollY;
+            if (!rafScheduled) {
+                requestAnimationFrame(updateAllAnimations);
+                rafScheduled = true;
+            }
+        }
+
+        function updateAllAnimations() {
+            rafScheduled = false;
+            if (currentScrollY > 5) {
+                mainHeader.classList.add('scrolled-header');
+            } else {
+                mainHeader.classList.remove('scrolled-header');
+            }
+
+            const docHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+            const scrollPercent = (currentScrollY / docHeight) * 100;
+            scrollProgress.style.width = `${scrollPercent}%`;
+
+            if (!prefersReducedMotion) {
+                const scrollOffset = currentScrollY * 0.1;
+                const currentTransform = heroContent.style.transform || 'translateY(0) perspective(1000px) rotateX(0deg) rotateY(0deg)';
+                const match = currentTransform.match(/rotateX\(([-.\d]+)deg\) rotateY\(([-.\d]+)deg\)/);
+                const rotX = match ? match[1] : 0;
+                const rotY = match ? match[2] : 0;
+                heroContent.style.transform = `translateY(${scrollOffset}px) perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            }
+        }
+
+        window.addEventListener('scroll', updateScrollAndHeader, { passive: true });
+        window.addEventListener('resize', () => {
+            updateScrollAndHeader();
+            initializeParticles();
+        });
+
+        if (scrollHint) {
+            scrollHint.addEventListener('click', (event) => {
+                event.preventDefault();
+                document.getElementById('about').scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+            });
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (document.getElementById('game-modal').classList.contains('open')) {
+                return;
+            }
+
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const scrollAmount = event.key === 'ArrowDown' ? window.innerHeight * 0.5 : -window.innerHeight * 0.5;
+                window.scrollBy({ top: scrollAmount, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+            }
+        });
+
+        function trackTitlePosition(event) {
+            if (!heroTitleWrapper) return;
+            const rect = heroTitleWrapper.getBoundingClientRect();
+            const titleX = event.clientX - rect.left - rect.width / 2;
+            const titleY = event.clientY - rect.top - rect.height / 2;
+            heroTitleWrapper.style.setProperty('--title-offset-x', `${titleX * 0.08}px`);
+            heroTitleWrapper.style.setProperty('--title-offset-y', `${titleY * 0.08}px`);
+        }
+
+        function handleHeroPointerMove(event) {
+            if (prefersReducedMotion || isMobile() || document.getElementById('game-modal').classList.contains('open')) {
+                return;
+            }
+            trackTitlePosition(event);
+            const rect = heroSection.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const offsetX = event.clientX - rect.left - centerX;
+            const offsetY = event.clientY - rect.top - centerY;
+            const rotateY = (offsetX / centerX) * -3;
+            const rotateX = (offsetY / centerY) * 3;
+            const scrollOffset = currentScrollY * 0.1;
+            heroContent.style.transform = `translateY(${scrollOffset}px) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        function resetHeroTilt() {
+            heroTitleWrapper?.style.setProperty('--title-offset-x', '0px');
+            heroTitleWrapper?.style.setProperty('--title-offset-y', '0px');
+            const scrollOffset = currentScrollY * 0.1;
+            heroContent.style.transform = `translateY(${scrollOffset}px) perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        }
+
+        heroSection.addEventListener('pointerenter', () => {
+            if (!prefersReducedMotion) {
+                pointerActive = true;
+            }
+        });
+
+        heroSection.addEventListener('pointerleave', () => {
+            pointerActive = false;
+            resetHeroTilt();
+        });
+
+        heroSection.addEventListener('pointermove', (event) => {
+            if (pointerActive) {
+                handleHeroPointerMove(event);
+            }
+        });
+
+        function Particle(x, y) {
+            this.x = x;
+            this.y = y;
+            this.size = Math.random() * particleSettings.maxSize + 1;
+            this.opacity = Math.random() * 0.5 + 0.3;
+            this.velocity = {
+                x: (Math.random() - 0.5) * particleSettings.horizontalSpeed,
+                y: -Math.random() * particleSettings.verticalSpeed - 0.2
+            };
+        }
+
+        Particle.prototype.draw = function draw() {
+            if (!pCtx) return;
+            pCtx.globalAlpha = this.opacity;
+            pCtx.fillStyle = `rgba(255, 69, 0, ${this.opacity})`;
+            pCtx.beginPath();
+            pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            pCtx.fill();
+        };
+
+        Particle.prototype.update = function update() {
+            this.x += this.velocity.x;
+            this.y += this.velocity.y;
+            if (this.y < 0) {
+                this.y = particleCanvas.height;
+                this.x = particleCanvas.width * Math.random();
+                this.velocity.x = (Math.random() - 0.5) * particleSettings.horizontalSpeed;
+            }
+            if (this.x < 0 || this.x > particleCanvas.width) {
+                this.velocity.x *= -1;
+            }
+        };
+
+        function initializeParticles() {
+            if (!particleCanvas || !pCtx || particleSettings.count === 0) {
+                cancelAnimationFrame(animationFrameIdParticles);
+                pCtx?.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                particles = [];
+                return;
+            }
+
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+            particles = Array.from({ length: particleSettings.count }, () => new Particle(Math.random() * particleCanvas.width, Math.random() * particleCanvas.height));
+            if (hasInitializedParticles) {
+                cancelAnimationFrame(animationFrameIdParticles);
+                if (!animationPaused) {
+                    animateParticles();
+                }
+            }
+        }
+
+        function animateParticles() {
+            if (!pCtx || animationPaused || particleSettings.count === 0) {
+                return;
+            }
+            pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            particles.forEach((particle) => {
+                particle.update();
+                particle.draw();
+            });
+            animationFrameIdParticles = requestAnimationFrame(animateParticles);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            animationPaused = document.hidden;
+            if (!animationPaused) {
+                animateParticles();
+            }
+        });
+
+        btnGlassElements.forEach((button) => {
+            button.addEventListener('click', (event) => {
+                triggerHapticFeedback();
+                const rect = button.getBoundingClientRect();
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${x - size / 2}px`;
+                ripple.style.top = `${y - size / 2}px`;
+                button.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            });
+        });
+
+        async function copyDiscordId() {
+            triggerHapticFeedback();
+            const discordIdText = 'picto_19';
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(discordIdText);
+                } else {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = discordIdText;
+                    tempInput.style.position = 'fixed';
+                    tempInput.style.opacity = '0';
+                    document.body.appendChild(tempInput);
+                    tempInput.focus();
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                }
+                copyMessage.style.opacity = '1';
+                setTimeout(() => {
+                    copyMessage.style.opacity = '0';
+                }, 1600);
+            } catch (error) {
+                console.error('Kopieren fehlgeschlagen:', error);
+            }
+        }
+
+        copyButton.addEventListener('click', copyDiscordId);
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = document.body.classList.toggle('menu-open');
+            menuToggle.querySelector('i').className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        });
+
+        navLinks.forEach((link) => {
+            link.addEventListener('click', () => {
+                if (isMobile() && document.body.classList.contains('menu-open')) {
+                    document.body.classList.remove('menu-open');
+                    menuToggle.querySelector('i').className = 'fas fa-bars';
+                }
+            });
+        });
+
+        function initializePage() {
+            setupIntersectionObserver();
+            updateScrollAndHeader();
+            initializeParticles();
+            if (particleSettings.count > 0) {
+                animateParticles();
+                hasInitializedParticles = true;
+            }
+            if (isMobile()) {
+                menuToggle.style.display = 'block';
+            }
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+            }, 600);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
+        }
+
+        const gameModal = document.getElementById('game-modal');
+        const openGameBtn = document.getElementById('open-game-btn');
+        const closeGameBtn = document.getElementById('close-game-btn');
+        const gameCanvasContainer = document.getElementById('game-canvas');
+        const gameScoreDisplay = document.getElementById('game-score');
+        const gameHighscoreDisplay = document.getElementById('game-highscore');
+        const gameInfo = document.getElementById('game-info');
+        const gameActionButton = document.getElementById('game-action-button');
+        const gameExitButton = document.getElementById('game-exit-button');
+
+        let canvas;
+        let ctx;
+        const GRAVITY = 0.5;
+        const JUMP_VELOCITY = -9;
+        const PIPE_SPEED = 2.5;
+        const PIPE_WIDTH = 70;
+        const PIPE_GAP = 160;
+        const GROUND_HEIGHT = 50;
+        const BIRD_RADIUS = 12;
+        const HIGH_SCORE_KEY = 'flappyShadowHighscore';
+
+        let gameLoopId;
+        let isGameRunning = false;
+        let player = null;
+        let pipes = [];
+        let score = 0;
+        let pipeGeneratorId;
+        let highscore = 0;
+        let groundOffset = 0;
+        let isCanvasInitialized = false;
+
+        function loadHighscore() {
+            const stored = Number.parseInt(localStorage.getItem(HIGH_SCORE_KEY) || '0', 10);
+            highscore = Number.isFinite(stored) ? stored : 0;
+        }
+
+        function saveHighscore(newScore) {
+            if (newScore > highscore) {
+                highscore = newScore;
+                localStorage.setItem(HIGH_SCORE_KEY, String(newScore));
+            }
+        }
+
+        function ensureCanvas() {
+            if (!isCanvasInitialized) {
+                canvas = document.createElement('canvas');
+                ctx = canvas.getContext('2d');
+                gameCanvasContainer.appendChild(canvas);
+                canvas.addEventListener('pointerdown', playerJump);
+                window.addEventListener('resize', resizeCanvas);
+                document.addEventListener('keydown', handleGameKeydown);
+                isCanvasInitialized = true;
+            }
+        }
+
+        function resizeCanvas() {
+            if (!canvas || !gameModal.classList.contains('open')) return;
+            canvas.width = gameCanvasContainer.clientWidth;
+            canvas.height = gameCanvasContainer.clientHeight;
+            if (player) {
+                player.x = canvas.width / 4;
+            }
+            if (!isGameRunning) {
+                draw();
+            }
+        }
+
+        function drawBackground() {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#2d3748';
+            ctx.fillRect(0, canvas.height - GROUND_HEIGHT, canvas.width, GROUND_HEIGHT);
+            ctx.strokeStyle = '#4a5568';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            for (let i = 0; i < canvas.width / 20; i += 1) {
+                const x = (i * 20 - groundOffset) % (canvas.width + 20);
+                if (x > -20) {
+                    ctx.moveTo(x, canvas.height - GROUND_HEIGHT);
+                    ctx.lineTo(x + 10, canvas.height - GROUND_HEIGHT + 10);
+                }
+            }
+            ctx.stroke();
+        }
+
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            const rotationAngle = Math.min(Math.max(player.velocity * 0.05, -0.6), 1.5);
+            ctx.rotate(rotationAngle);
+            const gradient = ctx.createRadialGradient(0, 0, player.radius / 2, 0, 0, player.radius);
+            gradient.addColorStop(0, '#8b5cf6');
+            gradient.addColorStop(1, '#4c1d95');
+            ctx.beginPath();
+            ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = '#ffeb3b';
+            ctx.beginPath();
+            ctx.moveTo(3, 0);
+            ctx.lineTo(-5, -5);
+            ctx.lineTo(-5, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+            const jumpBoostFactor = Math.abs(player.velocity / JUMP_VELOCITY);
+            ctx.shadowColor = player.velocity < 0 ? `rgba(255, 69, 0, ${jumpBoostFactor * 0.8})` : 'rgba(139, 92, 246, 0.9)';
+            ctx.shadowBlur = player.velocity < 0 ? 15 * jumpBoostFactor : 10;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawPipe(pipe) {
+            ctx.fillStyle = '#1e4620';
+            ctx.strokeStyle = '#388e3c';
+            ctx.lineWidth = 4;
+            ctx.fillRect(pipe.x, pipe.bottomY, PIPE_WIDTH, pipe.bottomHeight);
+            ctx.strokeRect(pipe.x, pipe.bottomY, PIPE_WIDTH, pipe.bottomHeight);
+            ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
+            ctx.strokeRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
+            ctx.fillStyle = '#2e6030';
+            ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, PIPE_WIDTH + 10, 30);
+            ctx.strokeRect(pipe.x - 5, pipe.topHeight - 30, PIPE_WIDTH + 10, 30);
+            ctx.fillRect(pipe.x - 5, pipe.bottomY, PIPE_WIDTH + 10, 30);
+            ctx.strokeRect(pipe.x - 5, pipe.bottomY, PIPE_WIDTH + 10, 30);
+        }
+
+        function draw() {
+            if (!ctx) return;
+            drawBackground();
+            pipes.forEach(drawPipe);
+            if (player) {
+                drawPlayer();
+            }
+            if (!isGameRunning) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '24px "Press Start 2P"';
+                ctx.fillStyle = '#ffeb3b';
+                ctx.textAlign = 'center';
+                ctx.fillText('FLAPPY SHADOW', canvas.width / 2, canvas.height / 2 - 60);
+                ctx.font = '16px "Press Start 2P"';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(gameInfo.textContent, canvas.width / 2, canvas.height / 2);
+            }
+        }
+
+        function resetGameState() {
+            ensureCanvas();
+            loadHighscore();
+            resizeCanvas();
+            player = {
+                x: canvas.width / 4,
+                y: canvas.height / 2,
+                velocity: 0,
+                radius: BIRD_RADIUS
+            };
+            pipes = [];
+            score = 0;
+            groundOffset = 0;
+            isGameRunning = false;
+            gameScoreDisplay.textContent = 'PUNKTE: 0';
+            gameHighscoreDisplay.textContent = `BESTER: ${highscore}`;
+            gameInfo.textContent = 'KLICKE ODER DRÜCKE LEERTASTE';
+            gameActionButton.style.display = 'inline-flex';
+            gameActionButton.textContent = 'SPIEL STARTEN';
+            gameExitButton.style.display = 'inline-flex';
+            draw();
+        }
+
+        function updatePlayer() {
+            player.velocity += GRAVITY;
+            player.y += player.velocity;
+            if (player.velocity > 12) player.velocity = 12;
+        }
+
+        function createPipe() {
+            const minHeight = 60;
+            const maxHeight = canvas.height - GROUND_HEIGHT - PIPE_GAP - minHeight;
+            const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            const newPipe = {
+                x: canvas.width,
+                topHeight,
+                bottomY: topHeight + PIPE_GAP,
+                bottomHeight: canvas.height - (topHeight + PIPE_GAP) - GROUND_HEIGHT,
+                passed: false
+            };
+            pipes.push(newPipe);
+        }
+
+        function updatePipes() {
+            for (let i = 0; i < pipes.length; i += 1) {
+                const pipe = pipes[i];
+                pipe.x -= PIPE_SPEED;
+                if (!pipe.passed && pipe.x + PIPE_WIDTH < player.x - player.radius) {
+                    score += 1;
+                    gameScoreDisplay.textContent = `PUNKTE: ${score}`;
+                    pipe.passed = true;
+                }
+                if (pipe.x + PIPE_WIDTH < 0) {
+                    pipes.splice(i, 1);
+                    i -= 1;
+                }
+            }
+        }
+
+        function checkCollisions() {
+            if (player.y + player.radius >= canvas.height - GROUND_HEIGHT || player.y - player.radius <= 0) {
+                return true;
+            }
+            return pipes.some((pipe) => {
+                const withinPipeX = player.x + player.radius > pipe.x && player.x - player.radius < pipe.x + PIPE_WIDTH;
+                if (!withinPipeX) {
+                    return false;
+                }
+                const hittingTop = player.y - player.radius < pipe.topHeight;
+                const hittingBottom = player.y + player.radius > pipe.bottomY;
+                return hittingTop || hittingBottom;
+            });
+        }
+
+        function handleGameKeydown(event) {
+            if (!gameModal.classList.contains('open')) return;
+            if (event.code === 'Space') {
+                event.preventDefault();
+                if (!isGameRunning) {
+                    startGame();
+                } else {
+                    playerJump();
+                }
+            } else if (event.key === 'Escape') {
+                closeGame();
+            }
+        }
+
+        function loadToneOnce() {
+            if (toneLoader) {
+                return toneLoader;
+            }
+            toneLoader = new Promise((resolve, reject) => {
+                if (toneLoaded) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js';
+                script.defer = true;
+                script.onload = () => {
+                    const tone = window.Tone;
+                    if (!tone) {
+                        reject(new Error('Tone.js konnte nicht geladen werden.'));
+                        return;
+                    }
+                    toneLoaded = true;
+                    synth = new tone.Synth().toDestination();
+                    crash = new tone.NoiseSynth({
+                        noise: { type: 'pink' },
+                        envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.05 }
+                    }).toDestination();
+                    resolve();
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+            return toneLoader;
+        }
+
+        async function playJumpSound() {
+            try {
+                await loadToneOnce();
+                const tone = window.Tone;
+                if (!tone) return;
+                if (tone.context.state !== 'running') {
+                    await tone.start();
+                }
+                synth.triggerAttackRelease('C5', '8n');
+            } catch (error) {
+                console.warn('Audio konnte nicht abgespielt werden:', error);
+            }
+        }
+
+        async function playCrashSound() {
+            try {
+                await loadToneOnce();
+                const tone = window.Tone;
+                if (!tone) return;
+                if (tone.context.state !== 'running') {
+                    await tone.start();
+                }
+                crash.triggerAttackRelease('4n', 0.1);
+            } catch (error) {
+                console.warn('Audio konnte nicht abgespielt werden:', error);
+            }
+        }
+
+        function gameLoop() {
+            if (!isGameRunning) {
+                cancelAnimationFrame(gameLoopId);
+                return;
+            }
+            updatePlayer();
+            updatePipes();
+            groundOffset = (groundOffset + PIPE_SPEED) % 20;
+            if (checkCollisions()) {
+                gameOver();
+                return;
+            }
+            draw();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            if (isGameRunning) return;
+            isGameRunning = true;
+            gameActionButton.style.display = 'none';
+            gameExitButton.style.display = 'none';
+            gameInfo.textContent = 'SCHATTEN FLIEGT!';
+            clearInterval(pipeGeneratorId);
+            pipeGeneratorId = setInterval(createPipe, 1500);
+            gameLoop();
+        }
+
+        function playerJump() {
+            triggerHapticFeedback();
+            if (!isGameRunning) {
+                startGame();
+            } else {
+                player.velocity = JUMP_VELOCITY;
+                playJumpSound();
+            }
+        }
+
+        function gameOver() {
+            if (!isGameRunning) return;
+            isGameRunning = false;
+            cancelAnimationFrame(gameLoopId);
+            clearInterval(pipeGeneratorId);
+            saveHighscore(score);
+            playCrashSound();
+            gameHighscoreDisplay.textContent = `BESTER: ${highscore}`;
+            gameInfo.textContent = `GAME OVER! Score: ${score}`;
+            gameActionButton.style.display = 'inline-flex';
+            gameActionButton.textContent = 'NEU STARTEN';
+            gameExitButton.style.display = 'inline-flex';
+            draw();
+        }
+
+        function openGame() {
+            gameModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            resetGameState();
+            loadToneOnce().catch(() => {
+                /* Audio optional */
+            });
+        }
+
+        function closeGame() {
+            cancelAnimationFrame(gameLoopId);
+            clearInterval(pipeGeneratorId);
+            gameModal.classList.remove('open');
+            document.body.style.overflow = '';
+            isGameRunning = false;
+        }
+
+        openGameBtn.addEventListener('click', openGame);
+        closeGameBtn.addEventListener('click', closeGame);
+        gameExitButton.addEventListener('click', closeGame);
+        gameActionButton.addEventListener('click', () => {
+            if (!isGameRunning) {
+                startGame();
+            }
+        });
+    </script>
+</body>
+</html>
