@@ -98,7 +98,7 @@
             height: calc(100% - 48px); overflow: hidden; background-color: #0f172a;
         }
         
-        /* --- Startmenü Stil --- */
+        /* --- StartmenÃ¼ Stil --- */
         #start-menu {
             position: absolute;
             bottom: calc(var(--taskbar-height) + 8px);
@@ -403,7 +403,7 @@
                                 row.innerHTML = `<span class="flex items-center gap-2 text-sm text-gray-300"><span>${app.iconEmoji}</span> ${app.title}</span>`;
                                 const delBtn = document.createElement('button');
                                 delBtn.className = 'text-red-400 hover:text-red-300 text-xs px-2';
-                                delBtn.innerText = 'Löschen';
+                                delBtn.innerText = 'LÃ¶schen';
                                 delBtn.onclick = () => { AppManager.uninstall(app.id); renderList(); };
                                 row.appendChild(delBtn);
                                 appList.appendChild(row);
@@ -509,8 +509,8 @@
                     if (app.isCustom) {
                         const badge = document.createElement('div');
                         badge.className = 'delete-badge';
-                        badge.innerHTML = '×';
-                        badge.onclick = (e) => { e.stopPropagation(); if(confirm(`${app.title} löschen?`)) AppManager.uninstall(id); };
+                        badge.innerHTML = 'Ã—';
+                        badge.onclick = (e) => { e.stopPropagation(); if(confirm(`${app.title} lÃ¶schen?`)) AppManager.uninstall(id); };
                         iconContainer.appendChild(badge);
                     }
 
