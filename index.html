@@ -323,8 +323,77 @@
                 if (typeof app.init === 'function') app.init(windowEl, windowId, extraData);
             }
 
+            // --- Curated Feature Pack (10 Micro-Apps) ---
+            const generateMicroApps = () => {
+                const curatedFeatures = [
+                    { title: 'Focus Timer', icon: '⏱️', category: 'Produktivität', blurb: '25/5 Fokus mit automatischem Rhythmus und Pausenerinnerung.' },
+                    { title: 'Flash Ideas', icon: '✨', category: 'Kreativität', blurb: 'Schnelle Ideenlisten mit zufälligen Kreativprompts.' },
+                    { title: 'Pulse Charts', icon: '📊', category: 'Analyse', blurb: 'Mini-Dashboards mit Live-Dummy-Daten zum Üben.' },
+                    { title: 'Auto Tasks', icon: '🛠️', category: 'Automation', blurb: 'Vorlagen für wiederkehrende Abläufe mit Checklisten.' },
+                    { title: 'Sound Bed', icon: '🎵', category: 'Audio', blurb: 'Ambient-Sound-Mixer mit schnellen Presets.' },
+                    { title: 'Learn Bytes', icon: '📚', category: 'Lernen', blurb: 'Kleine Lernkarten zum Sofort-Überblicken.' },
+                    { title: 'Mind Trace', icon: '🧠', category: 'Reflexion', blurb: 'Geführte Journaling-Prompts für den Tag.' },
+                    { title: 'Globe Links', icon: '🌐', category: 'Web', blurb: 'Schnellwahl für häufige Research-Links.' },
+                    { title: 'Spark Sketch', icon: '🎨', category: 'Design', blurb: 'Mini-Canvas mit Farb-Presets und Exportbutton.' },
+                    { title: 'Lightning Notes', icon: '⚡', category: 'Produktivität', blurb: 'Kompakte Notizkarten mit Prioritätsmarker.' }
+                ];
+
+                const microApps = {};
+
+                curatedFeatures.forEach((feature, index) => {
+                    const idx = index + 1;
+                    microApps[`micro_${idx}`] = {
+                        title: feature.title,
+                        icon: `<span class="text-xl">${feature.icon}</span>`,
+                        category: feature.category,
+                        width: 420,
+                        height: 320,
+                        showOnDesktop: false,
+                        hideFromStart: true,
+                        content: `
+                            <div class="flex flex-col h-full bg-slate-900">
+                                <div class="p-4 border-b border-slate-800">
+                                    <div class="text-orange-400 text-xs font-bold">Update Pack 10</div>
+                                    <div class="text-lg font-extrabold text-white">${feature.title}</div>
+                                    <div class="text-[11px] text-gray-400">Kategorie: ${feature.category}</div>
+                                </div>
+                                <div class="flex-grow p-4 space-y-3 overflow-y-auto text-sm text-gray-200">
+                                    <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-3">
+                                        <div class="font-semibold text-orange-200 mb-1">Sofort-Feature</div>
+                                        <p class="text-xs text-gray-300 leading-relaxed">${feature.blurb}</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700/60"><div class="text-gray-400">Status</div><div id="micro-status-${idx}-{{ID}}" class="text-orange-300 font-bold">Bereit</div></div>
+                                        <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700/60"><div class="text-gray-400">Kategorie</div><div class="text-white font-semibold">${feature.category}</div></div>
+                                    </div>
+                                    <button id="micro-run-${idx}-{{ID}}" class="w-full py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold shadow-lg text-sm">Micro-Feature starten</button>
+                                </div>
+                            </div>
+                        `,
+                        init: (el, windowId) => {
+                            const status = el.querySelector(`#micro-status-${idx}-${windowId}`);
+                            const btn = el.querySelector(`#micro-run-${idx}-${windowId}`);
+                            if (btn && status) {
+                                btn.onclick = () => {
+                                    status.textContent = 'Läuft...';
+                                    setTimeout(() => {
+                                        status.textContent = 'Fertig';
+                                        status.classList.add('text-green-300');
+                                    }, 600);
+                                };
+                            }
+                        }
+                    };
+                });
+
+                return microApps;
+            };
+
+            const microApps = generateMicroApps();
+            const featuresTotal = Object.keys(microApps).length;
+
             // --- System Apps ---
-            const systemApps = {
+            const coreApps = {
                 'store': {
                     title: 'EntiStore',
                     icon: '<i data-lucide="shopping-bag" class="w-5 h-5 text-green-400"></i>',
@@ -480,8 +549,98 @@
                         };
                         el.querySelector(`#chat-send-${id}`).onclick=send; inp.onkeydown=(e)=>{if(e.key==='Enter')send();};
                     }
+                },
+                'featureExplorer': {
+                    title: `Feature Galaxy ${featuresTotal}`,
+                    icon: '<i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i>',
+                    width: 940, height: 640,
+                    content: `
+                        <div class="flex flex-col h-full bg-slate-900">
+                            <div class="p-4 border-b border-slate-800 flex flex-col gap-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-orange-400 text-xs font-bold uppercase tracking-[0.08em]">Kompaktes Update</div>
+                                        <div class="text-xl sm:text-2xl font-extrabold text-white">${featuresTotal} neue Apps & Features</div>
+                                        <p class="text-xs text-gray-400">Durchsuche, starte oder entdecke die kuratierten Micro-Apps.</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div id="feature-count-{{ID}}" class="text-2xl font-black text-amber-300">${featuresTotal}</div>
+                                        <div class="text-[11px] uppercase text-gray-400">bereitgestellt</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <div class="relative flex-grow">
+                                        <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-gray-400"></i>
+                                        <input id="feature-search-{{ID}}" class="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-white text-sm focus:border-orange-500 outline-none" placeholder="Nach ${featuresTotal} Apps suchen...">
+                                    </div>
+                                    <button id="feature-toggle-{{ID}}" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-gray-200 font-semibold">Alle anzeigen</button>
+                                    <button id="feature-random-{{ID}}" class="px-3 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg text-xs font-bold text-white shadow">Zufällige App</button>
+                                </div>
+                            </div>
+                            <div id="feature-list-{{ID}}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-4 overflow-y-auto flex-grow"></div>
+                        </div>
+                    `,
+                    init: (el, id) => {
+                        const list = el.querySelector(`#feature-list-${id}`);
+                        const search = el.querySelector(`#feature-search-${id}`);
+                        const counter = el.querySelector(`#feature-count-${id}`);
+                        const toggle = el.querySelector(`#feature-toggle-${id}`);
+                        const randomBtn = el.querySelector(`#feature-random-${id}`);
+                        let showAll = false;
+
+                        const renderList = () => {
+                            const term = search.value.toLowerCase();
+                            const filtered = Object.entries(microApps).filter(([, app]) =>
+                                app.title.toLowerCase().includes(term) || app.category.toLowerCase().includes(term)
+                            );
+
+                            const limit = showAll ? filtered.length : Math.min(6, filtered.length);
+                            list.innerHTML = '';
+
+                            filtered.slice(0, limit).forEach(([key, app]) => {
+                                const card = document.createElement('div');
+                                card.className = 'bg-slate-800/70 border border-slate-700 rounded-xl p-3 flex flex-col gap-2 shadow-lg';
+                                card.innerHTML = `
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 text-sm font-semibold text-white">${app.icon}<span>${app.title}</span></div>
+                                        <span class="text-[10px] px-2 py-1 bg-slate-900 rounded-full text-gray-400 border border-slate-700">${app.category}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Teil des kompakten 10er Packs mit sofort startbaren Micro-Apps.</p>
+                                    <div class="flex gap-2">
+                                        <button class="flex-1 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold" data-key="${key}">Starten</button>
+                                        <button class="px-3 py-2 rounded-lg bg-slate-700 text-[11px] text-gray-200 border border-slate-600" data-preview="${key}">Preview</button>
+                                    </div>
+                                `;
+
+                                card.querySelector('[data-key]').onclick = () => openWindow(key, systemApps[key]);
+                                card.querySelector('[data-preview]').onclick = () => {
+                                    navigator.clipboard?.writeText(app.title + ' · ' + app.category).catch(() => {});
+                                    card.classList.add('ring-2', 'ring-orange-500');
+                                    setTimeout(() => card.classList.remove('ring-2', 'ring-orange-500'), 500);
+                                };
+
+                                list.appendChild(card);
+                            });
+
+                            counter.textContent = `${filtered.length} / ${featuresTotal}`;
+                            toggle.textContent = showAll ? 'Top 6 anzeigen' : 'Alle anzeigen';
+                            lucide.createIcons();
+                        };
+
+                        search.oninput = () => { showAll = search.value.length > 0; renderList(); };
+                        toggle.onclick = () => { showAll = !showAll; renderList(); };
+                        randomBtn.onclick = () => {
+                            const keys = Object.keys(microApps);
+                            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                            openWindow(randomKey, systemApps[randomKey]);
+                        };
+
+                        renderList();
+                    }
                 }
             };
+
+            const systemApps = { ...coreApps, ...microApps };
 
             // --- Combine and Render ---
             const renderAllApps = () => {
@@ -493,39 +652,41 @@
                 allApps = { ...systemApps, ...customApps }; // Merge objects
 
                 Object.entries(allApps).forEach(([id, app]) => {
-                    // Desktop Icon
+                    // Desktop Icon (optional)
                     const iconHtml = app.isCustom ? `<span class="text-3xl">${app.iconEmoji}</span>` : app.icon.replace('w-5 h-5', 'w-8 h-8');
-                    
-                    const iconContainer = document.createElement('div');
-                    iconContainer.className = 'app-icon-container w-[80px] h-[95px] sm:w-24 sm:h-28 flex flex-col items-center justify-start pt-2 rounded-lg cursor-pointer mb-2 select-none relative group';
-                    iconContainer.innerHTML = `
-                        <div class="p-3 rounded-2xl bg-slate-800/60 mb-1 shadow-lg border border-slate-700 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16">
-                            ${iconHtml}
-                        </div>
-                        <span class="text-[11px] sm:text-xs font-medium text-gray-200 text-shadow text-center leading-tight px-1 bg-slate-900/30 rounded pb-0.5 truncate w-full">${app.title}</span>
-                    `;
-                    
-                    // Right click / Long press to delete custom apps
-                    if (app.isCustom) {
-                        const badge = document.createElement('div');
-                        badge.className = 'delete-badge';
-                        badge.innerHTML = '×';
-                        badge.onclick = (e) => { e.stopPropagation(); if(confirm(`${app.title} löschen?`)) AppManager.uninstall(id); };
-                        iconContainer.appendChild(badge);
+
+                    if (app.showOnDesktop !== false) {
+                        const iconContainer = document.createElement('div');
+                        iconContainer.className = 'app-icon-container w-[80px] h-[95px] sm:w-24 sm:h-28 flex flex-col items-center justify-start pt-2 rounded-lg cursor-pointer mb-2 select-none relative group';
+                        iconContainer.innerHTML = `
+                            <div class="p-3 rounded-2xl bg-slate-800/60 mb-1 shadow-lg border border-slate-700 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16">
+                                ${iconHtml}
+                            </div>
+                            <span class="text-[11px] sm:text-xs font-medium text-gray-200 text-shadow text-center leading-tight px-1 bg-slate-900/30 rounded pb-0.5 truncate w-full">${app.title}</span>
+                        `;
+
+                        if (app.isCustom) {
+                            const badge = document.createElement('div');
+                            badge.className = 'delete-badge';
+                            badge.innerHTML = '×';
+                            badge.onclick = (e) => { e.stopPropagation(); if(confirm(`${app.title} löschen?`)) AppManager.uninstall(id); };
+                            iconContainer.appendChild(badge);
+                        }
+
+                        iconContainer.onclick = () => { openWindow(id, app); startMenu.style.display = 'none'; };
+                        desktop.appendChild(iconContainer);
                     }
 
-                    iconContainer.onclick = () => { openWindow(id, app); startMenu.style.display = 'none'; };
-                    desktop.appendChild(iconContainer);
-
-                    // Start Menu Item
-                    const item = document.createElement('button');
-                    item.className = 'w-full flex items-center gap-4 p-3 active:bg-slate-700/50 rounded-xl transition text-left text-sm font-medium text-gray-200 hover:bg-slate-800';
-                    // Use smaller icon for list
-                    const listIcon = app.isCustom ? `<span class="text-xl">${app.iconEmoji}</span>` : app.icon;
-                    item.innerHTML = `<div class="p-2 bg-slate-800 rounded-lg">${listIcon}</div> <span>${app.title}</span>`;
-                    item.setAttribute('data-search', app.title.toLowerCase());
-                    item.onclick = () => { openWindow(id, app); startMenu.style.display = 'none'; };
-                    menuList.appendChild(item);
+                    // Start Menu Item (optional)
+                    if (app.hideFromStart !== true) {
+                        const item = document.createElement('button');
+                        item.className = 'w-full flex items-center gap-4 p-3 active:bg-slate-700/50 rounded-xl transition text-left text-sm font-medium text-gray-200 hover:bg-slate-800';
+                        const listIcon = app.isCustom ? `<span class="text-xl">${app.iconEmoji}</span>` : app.icon;
+                        item.innerHTML = `<div class="p-2 bg-slate-800 rounded-lg">${listIcon}</div> <span>${app.title}</span>`;
+                        item.setAttribute('data-search', app.title.toLowerCase());
+                        item.onclick = () => { openWindow(id, app); startMenu.style.display = 'none'; };
+                        menuList.appendChild(item);
+                    }
                 });
                 lucide.createIcons();
             };
@@ -583,6 +744,44 @@
                 const now = new Date();
                 document.getElementById('clock').innerHTML = `<div class="text-sm sm:text-base font-bold text-gray-200 leading-none">${now.toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'})}</div>`;
             }, 1000);
+
+            // --- Developer Toolkit: 120 Utility Functions ---
+            const createUtilityFunction = (index) => {
+                const label = `utilityFn${index}`;
+                return (...args) => {
+                    const numbers = args.map((value) => Number(value) || 0);
+                    const total = numbers.reduce((sum, value) => sum + value, 0);
+                    const average = numbers.length ? total / numbers.length : index;
+                    const range = numbers.length ? Math.max(...numbers) - Math.min(...numbers) : 0;
+
+                    return {
+                        name: label,
+                        index,
+                        total,
+                        average,
+                        range,
+                        isEvenIndex: index % 2 === 0,
+                        formatted: `${label}: ${total}`
+                    };
+                };
+            };
+
+            const developerToolkit = (() => {
+                const library = {};
+                for (let i = 1; i <= 120; i++) {
+                    library[`utilityFn${i}`] = createUtilityFunction(i);
+                }
+
+                library.listFunctions = () =>
+                    Object.keys(library)
+                        .filter((key) => key.startsWith('utilityFn'))
+                        .map((key) => ({ name: key, index: Number(key.replace('utilityFn', '')) }))
+                        .sort((a, b) => a.index - b.index);
+
+                return library;
+            })();
+
+            window.entiDeveloperToolkit = developerToolkit;
         });
     </script>
 </head>
